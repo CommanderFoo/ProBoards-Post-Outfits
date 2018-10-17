@@ -158,7 +158,17 @@ class Post_Outfits_Posting {
 	}
 
 	static bind_key_event(){
-		let $the_form = (this.editing)? yootil.form.edit_post_form() : yootil.form.post_form();
+		let $the_form = null;
+
+		if(this.editing){
+			if(yootil.location.editing_thread()){
+				$the_form = yootil.form.edit_thread();
+			} else {
+				$the_form = yootil.form.edit_post();
+			}
+		} else {
+			$the_form = yootil.form.post_form();
+		}
 
 		if($the_form.length){
 			$the_form.on("submit", () => {
@@ -170,9 +180,27 @@ class Post_Outfits_Posting {
 		}
 	}
 
+	static get_hook(){
+		let hook = "";
+
+		if(this.new_thread){
+			hook = "thread_new";
+		} else if(this.editing){
+			if(yootil.location.editing_thread()){
+				hook = "thread_edit";
+			} else {
+				hook = "post_edit";
+			}
+		} else {
+			hook = "post_new";
+		}
+
+		return hook;
+	}
+
 	static set_on(){
 		if((this.new_thread || this.new_post || this.editing) && this._submitted){
-			let hook = (this.new_thread)? "thread_new" : ((this.editing)? "post_edit" : "post_new");
+			let hook = this.get_hook();
 			let outfit = "";
 
 			if(this.selected_outfit != null && this.saved_outfits[this.selected_outfit] != null){
@@ -278,6 +306,7 @@ class Post_Outfits_Posting {
 			}, 1100);
 
 			Post_Outfits_Posting.save_outfit(id, img, txt);
+			Post_Outfits_Posting.saved_outfits = Post_Outfits_Posting.load_saved_outfits();
 		});
 
 		$elem.find(".post-outfits-item-picture").on("click", function(){
@@ -299,10 +328,6 @@ class Post_Outfits_Posting {
 
 			$item.find(".post-outfits-item-asterisk").addClass("post-outfits-item-asterisk-unsaved");
 		});
-	}
-
-	static use_outfit(content = ""){
-
 	}
 
 	static build_saved_post_outfits(){
@@ -411,17 +436,24 @@ class Post_Outfits_Display {
 
 	static create_post_outfit(id, $post, width, outfit){
 		let outfit_html = "<div data-post-id-outfit='post-" + id + "' class='post-outfits-post-item-wrapper'><div class='post-outfits-post-item'>";
+
+		outfit_html += "<div class='post-outfits-post-item-title' title='" + Post_Outfits.SETTINGS.description + "'>" + Post_Outfits.SETTINGS.title + "</div>";
+
 		let img = "<em>No Image</em>";
+		let has_img = false;
 
 		if(outfit.i){
 			img = "<img src='" + yootil.html_encode(outfit.i) + "' />";
+			has_img = true;
 		}
 
 		let text_container = "";
 		let img_container = "<div class='post-outfits-post-item-image'>" + img + "</div>";
 
 		if(outfit.t.length > 0){
-			text_container = "<div class='post-outfits-post-item-text'>" + yootil.html_encode(outfit.t) + "</div>";
+			let parser = new Post_Outfits_Parser();
+
+			text_container = "<div class='post-outfits-post-item-text'>" + parser.parse(outfit.t) + "</div>";
 		} else {
 			img_container = "<div class='post-outfits-post-item-image post-outfits-post-item-image-no-border'>" + img + "</div>";
 		}
@@ -433,13 +465,32 @@ class Post_Outfits_Display {
 
 		let $outfit = $(outfit_html);
 
+		$outfit.find(".post-outfits-post-item-title").tipTip({
+
+			defaultPosition: "left",
+			maxWidth: "auto"
+
+		});
+
+		if(has_img){
+			$outfit.find(".post-outfits-post-item-image img").tipTip({
+
+				defaultPosition: "left",
+				maxWidth: "auto",
+				content: img
+
+			});
+		}
+
 		if(yootil.user.is_staff()){
-			$outfit.on("click", function(){
+			$outfit.find(".post-outfits-post-item-title").on("click", function(){
 				pb.window.confirm("Remove outfit from this post?", () => {
-					let post_id = parseInt($(this).attr("data-post-id-outfit").split("-")[1], 10);
+
+					let post_id = parseInt($(this).parent().parent().attr("data-post-id-outfit").split("-")[1], 10);
 
 					yootil.key.set(Post_Outfits.PLUGIN_KEY, "", post_id);
-					$(this).remove();
+					$(this).parent().parent().remove();
+
 				});
 			})
 		}
@@ -465,6 +516,66 @@ class Post_Outfits_Display {
 				});
 			}
 		})
+	}
+
+}
+
+class Post_Outfits_Parser {
+
+	constructor(){
+		this.parser_lookup = [
+
+			{
+				open_bbc: "[b]",
+				close_bbc: "[/b]",
+				open_html: "<b>",
+				close_html: "</b>"
+			},
+
+			{
+				open_bbc: "[i]",
+				close_bbc: "[/i]",
+				open_html: "<em>",
+				close_html: "</em>"
+			},
+
+			{
+				open_bbc: "[s]",
+				close_bbc: "[/s]",
+				open_html: "<s>",
+				close_html: "</s>"
+			},
+
+			{
+				open_bbc: "[u]",
+				close_bbc: "[/u]",
+				open_html: "<u>",
+				close_html: "</u>"
+			},
+
+			{
+				open_bbc: "[center]",
+				close_bbc: "[/center]",
+				open_html: "<div style='text-align: center'>",
+				close_html: "</div>"
+			}
+
+		];
+	}
+
+	parse(str = ""){
+		let html = yootil.html_encode(str);
+
+		for(let i = 0; i < this.parser_lookup.length; ++ i){
+			let item = this.parser_lookup[i];
+
+			html = html.replace(item.open_bbc, item.open_html);
+			html = html.replace(item.close_bbc, item.close_html);
+		}
+
+		html = html.replace(/\n|\r/g, "<br />");
+
+		return html;
 	}
 
 }

@@ -40,7 +40,17 @@ class Post_Outfits_Posting {
 	}
 
 	static bind_key_event(){
-		let $the_form = (this.editing)? yootil.form.edit_post_form() : yootil.form.post_form();
+		let $the_form = null;
+
+		if(this.editing){
+			if(yootil.location.editing_thread()){
+				$the_form = yootil.form.edit_thread();
+			} else {
+				$the_form = yootil.form.edit_post();
+			}
+		} else {
+			$the_form = yootil.form.post_form();
+		}
 
 		if($the_form.length){
 			$the_form.on("submit", () => {
@@ -52,9 +62,27 @@ class Post_Outfits_Posting {
 		}
 	}
 
+	static get_hook(){
+		let hook = "";
+
+		if(this.new_thread){
+			hook = "thread_new";
+		} else if(this.editing){
+			if(yootil.location.editing_thread()){
+				hook = "thread_edit";
+			} else {
+				hook = "post_edit";
+			}
+		} else {
+			hook = "post_new";
+		}
+
+		return hook;
+	}
+
 	static set_on(){
 		if((this.new_thread || this.new_post || this.editing) && this._submitted){
-			let hook = (this.new_thread)? "thread_new" : ((this.editing)? "post_edit" : "post_new");
+			let hook = this.get_hook();
 			let outfit = "";
 
 			if(this.selected_outfit != null && this.saved_outfits[this.selected_outfit] != null){
@@ -160,6 +188,7 @@ class Post_Outfits_Posting {
 			}, 1100);
 
 			Post_Outfits_Posting.save_outfit(id, img, txt);
+			Post_Outfits_Posting.saved_outfits = Post_Outfits_Posting.load_saved_outfits();
 		});
 
 		$elem.find(".post-outfits-item-picture").on("click", function(){
@@ -181,10 +210,6 @@ class Post_Outfits_Posting {
 
 			$item.find(".post-outfits-item-asterisk").addClass("post-outfits-item-asterisk-unsaved");
 		});
-	}
-
-	static use_outfit(content = ""){
-
 	}
 
 	static build_saved_post_outfits(){

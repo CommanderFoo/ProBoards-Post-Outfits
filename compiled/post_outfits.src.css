@@ -379,12 +379,18 @@
 
 .post-outfits-post-item-text {
 
-	display: flex;
-	flex: 1;
 	overflow-y: auto;
 	overflow-x: hidden;
 	font-size: 85%;
 	padding: 2px;
 	max-height: 150px;
+
+}
+
+.post-outfits-post-item-title {
+
+	border-bottom: 1px solid;
+	font-size: 85%;
+	text-align:  center;
 
 }

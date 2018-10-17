@@ -30,17 +30,24 @@ class Post_Outfits_Display {
 
 	static create_post_outfit(id, $post, width, outfit){
 		let outfit_html = "<div data-post-id-outfit='post-" + id + "' class='post-outfits-post-item-wrapper'><div class='post-outfits-post-item'>";
+
+		outfit_html += "<div class='post-outfits-post-item-title' title='" + Post_Outfits.SETTINGS.description + "'>" + Post_Outfits.SETTINGS.title + "</div>";
+
 		let img = "<em>No Image</em>";
+		let has_img = false;
 
 		if(outfit.i){
 			img = "<img src='" + yootil.html_encode(outfit.i) + "' />";
+			has_img = true;
 		}
 
 		let text_container = "";
 		let img_container = "<div class='post-outfits-post-item-image'>" + img + "</div>";
 
 		if(outfit.t.length > 0){
-			text_container = "<div class='post-outfits-post-item-text'>" + yootil.html_encode(outfit.t) + "</div>";
+			let parser = new Post_Outfits_Parser();
+
+			text_container = "<div class='post-outfits-post-item-text'>" + parser.parse(outfit.t) + "</div>";
 		} else {
 			img_container = "<div class='post-outfits-post-item-image post-outfits-post-item-image-no-border'>" + img + "</div>";
 		}
@@ -52,13 +59,32 @@ class Post_Outfits_Display {
 
 		let $outfit = $(outfit_html);
 
+		$outfit.find(".post-outfits-post-item-title").tipTip({
+
+			defaultPosition: "left",
+			maxWidth: "auto"
+
+		});
+
+		if(has_img){
+			$outfit.find(".post-outfits-post-item-image img").tipTip({
+
+				defaultPosition: "left",
+				maxWidth: "auto",
+				content: img
+
+			});
+		}
+
 		if(yootil.user.is_staff()){
-			$outfit.on("click", function(){
+			$outfit.find(".post-outfits-post-item-title").on("click", function(){
 				pb.window.confirm("Remove outfit from this post?", () => {
-					let post_id = parseInt($(this).attr("data-post-id-outfit").split("-")[1], 10);
+
+					let post_id = parseInt($(this).parent().parent().attr("data-post-id-outfit").split("-")[1], 10);
 
 					yootil.key.set(Post_Outfits.PLUGIN_KEY, "", post_id);
-					$(this).remove();
+					$(this).parent().parent().remove();
+
 				});
 			})
 		}
