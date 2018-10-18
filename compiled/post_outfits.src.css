@@ -375,6 +375,7 @@
 
 	max-height: 100px;
 	max-width: 75px;
+	cursor: pointer;
 
 }
 
@@ -399,5 +400,12 @@
 	border-bottom: 1px solid;
 	font-size: 85%;
 	text-align:  center;
+
+}
+
+.post-outfits-post-item-image-hover img {
+
+	max-height: 400px;
+	max-width: 400px;
 
 }

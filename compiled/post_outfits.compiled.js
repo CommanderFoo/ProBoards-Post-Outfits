@@ -549,7 +549,7 @@ var Post_Outfits_Display = function () {
 
 					defaultPosition: "left",
 					maxWidth: "auto",
-					content: img
+					content: "<div class='post-outfits-post-item-image-hover'>" + img + "</div>"
 
 				});
 

@@ -71,7 +71,7 @@ class Post_Outfits_Display {
 
 				defaultPosition: "left",
 				maxWidth: "auto",
-				content: img
+				content: "<div class='post-outfits-post-item-image-hover'>" + img + "</div>"
 
 			});
 
