@@ -12,7 +12,7 @@ class Post_Outfits_Item {
 
 		if(item.i.length > 10){
 			img_url = item.i;
-			html += "<img class='post-outfits-item-preview-img' src='" + yootil.html_encode(item.i) + "' />";
+			html += "<img class='post-outfits-item-preview-img' src='" + pb.text.escape_html(item.i) + "' />";
 		} else {
 			html += "<img class='post-outfits-item-preview-img' src='" + Post_Outfits.IMAGES.nopreview + "' />";
 		}

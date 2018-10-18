@@ -37,7 +37,7 @@ class Post_Outfits_Display {
 		let has_img = false;
 
 		if(outfit.i){
-			img = "<img src='" + yootil.html_encode(outfit.i) + "' />";
+			img = "<img src='" + pb.text.escape_html(outfit.i) + "' />";
 			has_img = true;
 		}
 
@@ -67,23 +67,19 @@ class Post_Outfits_Display {
 		});
 
 		if(has_img){
-			$outfit.find(".post-outfits-post-item-image img").tipTip({
+			if(outfit.i.match(/^(https?:\/\/|www\.)/i)){
+				$outfit.find(".post-outfits-post-item-image img").tipTip({
 
-				defaultPosition: "left",
-				maxWidth: "auto",
-				content: "<div class='post-outfits-post-item-image-hover'>" + img + "</div>"
+					defaultPosition: "left",
+					maxWidth: "auto",
+					content: "<div class='post-outfits-post-item-image-hover'><img src='" + pb.text.escape_html(outfit.i) + "' /></div>"
 
-			});
+				});
 
-			$outfit.find(".post-outfits-post-item-image img").on("click", function(e){
-				let src = $(this).attr("src");
-
-				if(src.match(/^(https?:\/\/|www\.)/i)){
+				$outfit.find(".post-outfits-post-item-image img").on("click", function(e){
 					window.open($(this).attr("src"));
-				}
-
-				e.stopPropagation();
-			})
+				});
+			}
 		}
 
 		if(yootil.user.is_staff()){
