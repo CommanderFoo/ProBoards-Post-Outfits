@@ -92,7 +92,7 @@ class Post_Outfits_Item {
 			html += "<img class='post-outfits-item-preview-img' src='" + Post_Outfits.IMAGES.nopreview + "' />";
 		}
 
-		html += "<div class='post-outfits-item-image-url'><input placeholder='Preview Image URL...' type='text' value='" + yootil.html_encode(img_url) + "' /></div>";
+		html += "<div class='post-outfits-item-image-url'><input placeholder='Preview Image URL...' type='text' value='" + pb.text.escape_html(img_url) + "' /></div>";
 
 		html += "</div>";
 
@@ -480,6 +480,16 @@ class Post_Outfits_Display {
 				content: img
 
 			});
+
+			$outfit.find(".post-outfits-post-item-image img").on("click", function(e){
+				let src = $(this).attr("src");
+
+				if(src.match(/^(https?:\/\/|www\.)/i)){
+					window.open($(this).attr("src"));
+				}
+
+				e.stopPropagation();
+			})
 		}
 
 		if(yootil.user.is_staff()){

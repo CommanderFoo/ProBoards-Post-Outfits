@@ -371,6 +371,13 @@
 	
 }
 
+.post-outfits-post-item-image img {
+
+	max-height: 100px;
+	max-width: 75px;
+
+}
+
 .post-outfits-post-item-image-no-border {
 
 	border-bottom-width: 0;
